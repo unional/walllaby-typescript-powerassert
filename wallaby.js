@@ -12,7 +12,7 @@ module.exports = function () {
     env: {
       type: 'node'
     },
-
+    testFramework: 'jest',
     // for ES code (not TypeScript) babel compiler should be used instead,
     // https://wallabyjs.com/docs/integration/es-next.html
 
