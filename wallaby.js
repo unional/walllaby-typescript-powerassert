@@ -2,7 +2,7 @@ module.exports = function () {
   return {
     files: [
       'src/**/*.ts',
-      {pattern: 'src/**/*.unit.ts', ignore: true}
+      '!src/**/*.unit.ts'
     ],
 
     tests: [
@@ -13,13 +13,13 @@ module.exports = function () {
       type: 'node'
     },
     testFramework: 'jest',
+    debug: true,
     // for ES code (not TypeScript) babel compiler should be used instead,
     // https://wallabyjs.com/docs/integration/es-next.html
-
     preprocessors: {
       '**/*.unit.js': file => {
+        const sourceMapCommentRegEx = /\/\/[@#] sourceMappingURL=data:application\/json(?:;charset[:=][^;]+)?;base64,(.*)\n/;
         var getSourceMapFromDataUrl = function (code) {
-          const sourceMapCommentRegEx = /\/\/[@#] sourceMappingURL=data:application\/json(?:;charset[:=][^;]+)?;base64,(.*)\n/;
           const match = code.match(sourceMapCommentRegEx);
           const sourceMapBase64 = match[1];
           return JSON.parse(new Buffer(sourceMapBase64, 'base64').toString());
@@ -27,11 +27,9 @@ module.exports = function () {
         var transformedCode = require('espower-source')(
           file.content.replace('(\'assert\')', '(\'power-assert\')'),
           file.path);
-
-        return {code: transformedCode, sourceMap: getSourceMapFromDataUrl(transformedCode)};
+        return { code: transformedCode.replace(sourceMapCommentRegEx, ''), sourceMap: getSourceMapFromDataUrl(transformedCode) };
       }
     },
-
 
     // This is not required for power-assert to work in wallaby,
     // it's just to make inline messages better
